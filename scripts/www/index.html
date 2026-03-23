@@ -1,88 +1,881 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="stylesheet" href="./static/css/styles.css" />
-        <meta
-            http-equiv="Content-Security-Policy"
-            content="default-src * 'unsafe-inline' 'unsafe-eval'"
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Tauri App</title>
-        <script src="./static/js/main.js"></script>
-    </head>
-    <body>
-        <main class="container">
-            <h1>Welcome to TauriMan</h1>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3505路区间车发车时间</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-            <div class="row">
-                <a
-                    href="https://tauri.app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <img
-                        src="./assets/tauri.svg"
-                        class="logo tauri"
-                        alt="Tauri logo"
-                    />
-                </a>
-                <a
-                    href="https://pakeplus.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <img
-                        src="https://hk.gh-proxy.org/https://github.com/Sjj1024/PakePlus/blob/main/app-icon.png"
-                        class="logo vanilla"
-                        alt="JavaScript logo"
-                    />
-                </a>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
+            color: #1a3c1a;
+            line-height: 1.5;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 28px;
+            padding: 25px;
+            box-shadow: 0 12px 35px rgba(46, 125, 50, 0.12);
+            margin-bottom: 20px;
+            border: 1px solid rgba(76, 175, 80, 0.1);
+        }
+
+        h1 {
+            font-size: 34px;
+            font-weight: 700;
+            text-align: center;
+            color: #1a3c1a;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .route-info {
+            text-align: center;
+            font-size: 20px;
+            color: #4c7c4c;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .current-time-container {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            border-radius: 22px;
+            padding: 22px;
+            margin-bottom: 25px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .current-time-label {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .current-time {
+            font-size: 52px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .current-date {
+            font-size: 20px;
+            font-weight: 500;
+            opacity: 0.95;
+        }
+
+        .next-bus-container {
+            background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+            border-radius: 22px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 2px solid #c8e6c9;
+            box-shadow: 0 5px 15px rgba(200, 230, 201, 0.3);
+        }
+
+        .next-bus-label {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a3c1a;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .next-bus-time {
+            font-size: 72px;
+            font-weight: 900;
+            color: #2E7D32;
+            margin-bottom: 12px;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            letter-spacing: -1.5px;
+        }
+
+        .countdown {
+            font-size: 32px;
+            font-weight: 800;
+            color: #FF9800;
+            margin-bottom: 10px;
+            background: rgba(255, 152, 0, 0.1);
+            padding: 8px 20px;
+            border-radius: 16px;
+            display: inline-block;
+        }
+
+        .countdown-label {
+            font-size: 20px;
+            color: #4c7c4c;
+            font-weight: 600;
+        }
+
+        .schedule-container {
+            background-color: white;
+            border-radius: 22px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #c8e6c9;
+            box-shadow: 0 5px 15px rgba(200, 230, 201, 0.2);
+        }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .schedule-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a3c1a;
+        }
+
+        .schedule-period {
+            font-size: 20px;
+            font-weight: 700;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 16px;
+            color: #2E7D32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .buses-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: #f9fdf9;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #e8f5e9;
+        }
+
+        .bus-time {
+            font-size: 48px;
+            font-weight: 800;
+            color: #1a3c1a;
+            text-align: center;
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .bus-time.current {
+            color: #2E7D32;
+            position: relative;
+            transform: scale(1.1);
+        }
+
+        .bus-time.current::after {
+            content: "即将发车";
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            background-color: #2E7D32;
+            padding: 6px 16px;
+            border-radius: 12px;
+            white-space: nowrap;
+            box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
+        }
+
+        .bus-time.past {
+            color: #b0bec5;
+        }
+
+        .bus-time.future {
+            color: #1a3c1a;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+            border: none;
+            border-radius: 18px;
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            padding: 18px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3);
+            flex: 1;
+            white-space: nowrap;
+            min-height: 60px;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #43A047 0%, #2E7D32 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .nav-btn:disabled {
+            background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 8px rgba(200, 230, 201, 0.3);
+            color: #81c784;
+        }
+
+        .boundary-message {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #FF9800;
+            padding: 18px;
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFECB3 100%);
+            border-radius: 18px;
+            margin-top: 20px;
+            display: none;
+            border: 2px solid #FFB74D;
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.1);
+        }
+
+        .boundary-message.show {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .all-schedule-container {
+            background-color: white;
+            border-radius: 22px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 2px solid #c8e6c9;
+            box-shadow: 0 5px 15px rgba(200, 230, 201, 0.2);
+        }
+
+        .all-schedule-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a3c1a;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .schedule-columns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .schedule-column {
+            flex: 1;
+            min-width: 150px;
+            background-color: #f9fdf9;
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid #e8f5e9;
+        }
+
+        .schedule-period-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #c8e6c9;
+        }
+
+        .schedule-times {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .schedule-time {
+            font-size: 24px;
+            font-weight: 600;
+            color: #b0bec5;
+            padding: 10px 0;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .schedule-time:hover {
+            background-color: #e8f5e9;
+        }
+
+        .schedule-time.current {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border-radius: 12px;
+            padding: 10px 12px;
+            color: #2E7D32;
+            border: 2px solid #81C784;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+                border-radius: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .route-info {
+                font-size: 16px;
+                white-space: normal;
+                word-wrap: break-word;
+                max-width: 100%;
+            }
+
+            .current-time {
+                font-size: 36px;
+            }
+
+            .current-date {
+                font-size: 16px;
+            }
+
+            .next-bus-time {
+                font-size: 48px;
+            }
+
+            .countdown {
+                font-size: 24px;
+            }
+
+            .bus-time {
+                font-size: 32px;
+                margin-bottom: 30px;
+            }
+
+            .bus-time.current::after {
+                font-size: 14px;
+                bottom: -25px;
+                white-space: nowrap;
+                transform: translateX(-50%) translateY(0);
+            }
+
+            .nav-btn {
+                font-size: 16px;
+                padding: 10px 6px;
+                min-height: 40px;
+                margin: 5px 0;
+            }
+
+            #directionBtn {
+                margin: 10px auto;
+            }
+
+            .navigation-buttons {
+                margin-top: 15px;
+                gap: 10px;
+            }
+
+            .schedule-column {
+                min-width: 100%;
+            }
+
+            .schedule-period-title {
+                font-size: 16px;
+            }
+
+            .schedule-time {
+                font-size: 20px;
+            }
+
+            .direction-btn {
+                min-width: 40px;
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>3505路区间车</h1>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <div class="route-info" id="routeInfo">张应便民服务中心 → 胶州汽车总站</div>
+        </div>
+        <div style="display: flex; justify-content: center; margin-bottom: 25px;">
+            <button class="nav-btn" id="directionBtn" style="width: auto; min-width: 50px; padding: 8px 16px; font-size: 16px;">
+                <i class="fas fa-exchange-alt"></i>
+            </button>
+        </div>
+
+        <div class="current-time-container">
+            <div class="current-time-label">
+                <i class="far fa-clock"></i>
+                <span>当前时间</span>
             </div>
-            <p>Click to get data</p>
-            <form class="row" id="greet-form">
-                <input id="greet-input" placeholder="Enter a name..." />
-                <button type="submit" id="getdata">GET DATA</button>
-            </form>
-            <div class="functions">
-                <a href="./book.html" target="_self">跳转到book.html</a>
-                <a
-                    href="https://www.baidu.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >跳到百度blank
-                </a>
-                <a
-                    href="https://www.baidu.com"
-                    target="_self"
-                    rel="noopener noreferrer"
-                >
-                    跳到百度self
-                </a>
-                <button onclick="sayHello()">点击我</button>
-                <button onclick="sayHello()">下载文件</button>
-                <button onclick="sayHello()">上传文件</button>
-                <button onclick="sayHello()">访问相机</button>
-                <button onclick="sayHello()">访问麦克风</button>
-                <button onclick="sayHello()">访问相册</button>
-                <button class="btn" onclick="openWechat()">打开微信</button>
-                <button class="btn" onclick="openWechatScan()">
-                    打开扫一扫
+            <div class="current-time" id="currentTime">00:00:00</div>
+            <div class="current-date" id="currentDate">2026年3月16日 星期一</div>
+        </div>
+
+        <div class="next-bus-container">
+            <div class="next-bus-label">
+                <i class="fas fa-bus"></i>
+                <span>下一班车</span>
+            </div>
+            <div class="next-bus-time" id="nextBusTime">--:--</div>
+            <div class="countdown" id="countdown">--:--:--</div>
+            <div class="countdown-label">距离发车时间</div>
+        </div>
+
+        <div class="schedule-container">
+            <div class="schedule-header">
+                <div class="schedule-title">发车时刻表</div>
+                <div class="schedule-period" id="periodLabel">早高峰</div>
+            </div>
+
+            <div class="buses-container" id="busesContainer">
+                <!-- 当前显示的一班车将在这里动态生成 -->
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>上一班</span>
                 </button>
-                <button class="btn" onclick="openZhihu()">打开知乎</button>
-                <button onclick="sayHello()">打开抖音</button>
-                <button onclick="sayHello()">用浏览器打开</button>
-                <button>打开知乎</button>
+                <button class="nav-btn" id="nextBtn">
+                    <span>下一班</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
-            <p id="greet-msg"></p>
-            <img src="./static/image/cursor.jpeg" alt="logo" />
-            <video
-                src="https://hk.gh-proxy.org/https://github.com/Sjj1024/PakePlus/blob/main/docs/static/videos/pakeplus.mp4"
-                autoplay
-                controls
-                style="width: 100%; height: 100%"
-            ></video>
-            <audio src="./static/music/yin.mp3" controls></audio>
-        </main>
-    </body>
+
+            <div class="boundary-message" id="boundaryMessage">
+                <!-- 边界提示信息将在这里显示 -->
+            </div>
+        </div>
+
+        <div class="all-schedule-container">
+            <div class="all-schedule-title">全天发车时刻表</div>
+            <div class="schedule-columns" id="allSchedule">
+                <!-- 全天时刻表将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 所有发车时间（按时间顺序排列）
+        const allBusTimes = {
+            // 张应便民服务中心 → 胶州汽车总站
+            forward: [
+                "06:00", "06:50", "07:10", "07:50",
+                "08:10", "08:50", "09:10", "09:50",
+                "10:10", "11:00", "12:00", "12:25",
+                "12:50", "13:10", "13:55", "14:20",
+                "15:05", "15:25", "16:15", "17:20"
+            ],
+            // 胶州汽车总站 → 张应便民服务中心
+            reverse: [
+                "06:50", "07:10", "08:00", "08:55", "09:20",
+                "10:05", "10:50", "11:10", "12:00", "12:30", "13:00", "13:50", "14:10", "14:50", "15:10", "15:50",
+                "16:10", "16:50", "17:10", "17:30"
+            ]
+        };
+
+        // 时间段定义
+        const timePeriods = {
+            forward: [
+                { name: "早高峰", start: "06:00", end: "10:00" },
+                { name: "平峰期", start: "10:00", end: "16:00" },
+                { name: "晚高峰", start: "16:00", end: "17:20" }
+            ],
+            reverse: [
+                { name: "早高峰", start: "06:50", end: "10:00" },
+                { name: "日常时段", start: "10:00", end: "16:00" },
+                { name: "晚高峰", start: "16:00", end: "17:30" }
+            ]
+        };
+
+        // 当前方向
+        let currentDirection = 'forward';
+
+        // 路线信息
+        const routeInfo = {
+            forward: "张应便民服务中心 → 胶州汽车总站",
+            reverse: "胶州汽车总站 → 张应便民服务中心"
+        };
+
+        // 当前显示的班次索引
+        let currentDisplayIndex = 0;
+        // 当前时间
+        let currentTime = new Date();
+        // 下一班车索引
+        let nextBusIndex = -1;
+        // 倒计时计时器
+        let countdownTimer = null;
+
+        // DOM元素
+        const currentTimeEl = document.getElementById('currentTime');
+        const currentDateEl = document.getElementById('currentDate');
+        const nextBusTimeEl = document.getElementById('nextBusTime');
+        const countdownEl = document.getElementById('countdown');
+        const periodLabelEl = document.getElementById('periodLabel');
+        const busesContainerEl = document.getElementById('busesContainer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const boundaryMessageEl = document.getElementById('boundaryMessage');
+        const allScheduleEl = document.getElementById('allSchedule');
+        const routeInfoEl = document.getElementById('routeInfo');
+        const directionBtn = document.getElementById('directionBtn');
+
+        // 初始化
+        function init() {
+            updateCurrentTime();
+            findNextBus();
+            updateDisplay();
+            renderAllSchedule();
+            startCountdown();
+
+            // 每秒更新一次时间
+            setInterval(updateCurrentTime, 1000);
+
+            // 每分钟重新计算下一班车
+            setInterval(() => {
+                findNextBus();
+                updateDisplay();
+                renderAllSchedule();
+            }, 60000);
+
+            // 绑定按钮事件
+            prevBtn.addEventListener('click', showPreviousBus);
+            nextBtn.addEventListener('click', showNextBus);
+            directionBtn.addEventListener('click', toggleDirection);
+
+            // 初始检查按钮状态
+            updateButtonState();
+        }
+
+        // 切换方向
+        function toggleDirection() {
+            // 切换方向
+            currentDirection = currentDirection === 'forward' ? 'reverse' : 'forward';
+            
+            // 更新路线信息
+            routeInfoEl.textContent = routeInfo[currentDirection];
+            
+            // 重置状态
+            currentDisplayIndex = 0;
+            nextBusIndex = -1;
+            
+            // 重新初始化
+            findNextBus();
+            updateDisplay();
+            renderAllSchedule();
+            startCountdown();
+        }
+
+        // 更新当前时间
+        function updateCurrentTime() {
+            currentTime = new Date();
+
+            // 格式化时间
+            const hours = currentTime.getHours().toString().padStart(2, '0');
+            const minutes = currentTime.getMinutes().toString().padStart(2, '0');
+            const seconds = currentTime.getSeconds().toString().padStart(2, '0');
+
+            currentTimeEl.textContent = `${hours}:${minutes}:${seconds}`;
+
+            // 格式化日期
+            const year = currentTime.getFullYear();
+            const month = currentTime.getMonth() + 1;
+            const day = currentTime.getDate();
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const weekday = weekdays[currentTime.getDay()];
+
+            currentDateEl.textContent = `${year}年${month}月${day}日 ${weekday}`;
+        }
+
+        // 开始倒计时
+        function startCountdown() {
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+            }
+
+            countdownTimer = setInterval(updateCountdown, 1000);
+            updateCountdown();
+        }
+
+        // 更新倒计时
+        function updateCountdown() {
+            if (nextBusIndex < 0) return;
+
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentSecond = now.getSeconds();
+            const currentTotalSeconds = currentHour * 3600 + currentMinute * 60 + currentSecond;
+
+            const nextBusTime = allBusTimes[currentDirection][nextBusIndex];
+            const [busHour, busMinute] = nextBusTime.split(':').map(Number);
+            let busTotalSeconds = busHour * 3600 + busMinute * 60;
+
+            // 如果下一班车时间小于当前时间，说明是第二天的车
+            if (busTotalSeconds <= currentTotalSeconds) {
+                busTotalSeconds += 24 * 3600;
+            }
+
+            const diffSeconds = busTotalSeconds - currentTotalSeconds;
+
+            // 如果倒计时为0或负数，重新查找下一班车
+            if (diffSeconds <= 0) {
+                findNextBus();
+                updateDisplay();
+                renderAllSchedule();
+                return;
+            }
+
+            const diffHours = Math.floor(diffSeconds / 3600);
+            const diffMinutes = Math.floor((diffSeconds % 3600) / 60);
+            const diffSecs = diffSeconds % 60;
+
+            countdownEl.textContent = 
+                `${diffHours.toString().padStart(2, '0')}:${diffMinutes.toString().padStart(2, '0')}:${diffSecs.toString().padStart(2, '0')}`;
+        }
+
+        // 找到下一班车
+        function findNextBus() {
+            const currentHour = currentTime.getHours();
+            const currentMinute = currentTime.getMinutes();
+            const currentTotalMinutes = currentHour * 60 + currentMinute;
+
+            // 找到第一个大于当前时间的发车时间
+            for (let i = 0; i < allBusTimes[currentDirection].length; i++) {
+                const [busHour, busMinute] = allBusTimes[currentDirection][i].split(':').map(Number);
+                const busTotalMinutes = busHour * 60 + busMinute;
+
+                if (busTotalMinutes > currentTotalMinutes) {
+                    nextBusIndex = i;
+
+                    // 如果当前显示的班次不是下一班车，则自动切换到下一班车
+                    if (currentDisplayIndex !== nextBusIndex) {
+                        currentDisplayIndex = nextBusIndex;
+                    }
+
+                    return;
+                }
+            }
+
+            // 如果所有班次都已过，则下一班是明天的第一班车
+            nextBusIndex = 0;
+            currentDisplayIndex = 0;
+        }
+
+        // 获取当前时间段
+        function getCurrentPeriod() {
+            const currentHour = currentTime.getHours();
+            const currentMinute = currentTime.getMinutes();
+            const currentTotalMinutes = currentHour * 60 + currentMinute;
+
+            for (const period of timePeriods[currentDirection]) {
+                const [startHour, startMinute] = period.start.split(':').map(Number);
+                const [endHour, endMinute] = period.end.split(':').map(Number);
+                const startTotalMinutes = startHour * 60 + startMinute;
+                const endTotalMinutes = endHour * 60 + endMinute;
+
+                if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes) {
+                    return period.name;
+                }
+            }
+
+            return "非运营时间";
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            // 更新下一班车时间
+            if (nextBusIndex >= 0) {
+                const nextBusTime = allBusTimes[currentDirection][nextBusIndex];
+                nextBusTimeEl.textContent = nextBusTime;
+            }
+
+            // 更新时间段标签
+            periodLabelEl.textContent = getCurrentPeriod();
+
+            // 更新显示的班车
+            renderBus();
+
+            // 更新按钮状态
+            updateButtonState();
+        }
+
+        // 渲染显示的班车
+        function renderBus() {
+            busesContainerEl.innerHTML = '';
+
+            // 确保索引在有效范围内
+            if (currentDisplayIndex < 0) currentDisplayIndex = 0;
+            if (currentDisplayIndex >= allBusTimes[currentDirection].length) currentDisplayIndex = allBusTimes[currentDirection].length - 1;
+
+            const busTime = allBusTimes[currentDirection][currentDisplayIndex];
+            const busEl = document.createElement('div');
+            busEl.className = 'bus-time';
+
+            // 判断是否是下一班车
+            if (currentDisplayIndex === nextBusIndex) {
+                busEl.classList.add('current');
+            }
+            // 判断是否已过
+            else if (currentDisplayIndex < nextBusIndex) {
+                busEl.classList.add('past');
+            }
+            // 未来的班车
+            else {
+                busEl.classList.add('future');
+            }
+
+            busEl.textContent = busTime;
+            busesContainerEl.appendChild(busEl);
+
+            // 隐藏边界提示信息
+            hideBoundaryMessage();
+        }
+
+        // 渲染全天时刻表
+        function renderAllSchedule() {
+            allScheduleEl.innerHTML = '';
+
+            // 按时间段分组
+            const periodGroups = {
+                "早高峰 (06:50-10:00)": [],
+                "日常时段 (10:00-16:00)": [],
+                "晚高峰 (16:00-17:30)": []
+            };
+
+            // 分配时间到对应时间段
+            allBusTimes[currentDirection].forEach(time => {
+                const [hour, minute] = time.split(':').map(Number);
+                const totalMinutes = hour * 60 + minute;
+
+                if (totalMinutes >= 6*60+50 && totalMinutes < 10*60) {
+                    periodGroups["早高峰 (06:50-10:00)"].push(time);
+                } else if (totalMinutes >= 10*60 && totalMinutes < 16*60) {
+                    periodGroups["日常时段 (10:00-16:00)"].push(time);
+                } else if (totalMinutes >= 16*60 && totalMinutes <= 17*60+30) {
+                    periodGroups["晚高峰 (16:00-17:30)"].push(time);
+                }
+            });
+
+            // 创建时间段列
+            Object.entries(periodGroups).forEach(([period, times]) => {
+                const columnEl = document.createElement('div');
+                columnEl.className = 'schedule-column';
+
+                const periodTitleEl = document.createElement('div');
+                periodTitleEl.className = 'schedule-period-title';
+                periodTitleEl.textContent = period;
+                columnEl.appendChild(periodTitleEl);
+
+                const timesEl = document.createElement('div');
+                timesEl.className = 'schedule-times';
+
+                times.forEach(time => {
+                    const timeEl = document.createElement('div');
+                    timeEl.className = 'schedule-time';
+                    timeEl.textContent = time;
+
+                    // 标记当前班车
+                    if (time === allBusTimes[currentDirection][nextBusIndex]) {
+                        timeEl.classList.add('current');
+                    }
+
+                    timesEl.appendChild(timeEl);
+                });
+
+                columnEl.appendChild(timesEl);
+                allScheduleEl.appendChild(columnEl);
+            });
+        }
+
+        // 显示上一班车
+        function showPreviousBus() {
+            if (currentDisplayIndex > 0) {
+                currentDisplayIndex--;
+                renderBus();
+                updateButtonState();
+            } else {
+                showBoundaryMessage('已经是第一班车了');
+            }
+        }
+
+        // 显示下一班车
+        function showNextBus() {
+            if (currentDisplayIndex < allBusTimes[currentDirection].length - 1) {
+                currentDisplayIndex++;
+                renderBus();
+                updateButtonState();
+            } else {
+                showBoundaryMessage('已经是最后一班车了');
+            }
+        }
+
+        // 更新按钮状态
+        function updateButtonState() {
+            prevBtn.disabled = currentDisplayIndex === 0;
+            nextBtn.disabled = currentDisplayIndex === allBusTimes[currentDirection].length - 1;
+        }
+
+        // 显示边界提示信息
+        function showBoundaryMessage(message) {
+            boundaryMessageEl.textContent = message;
+            boundaryMessageEl.classList.add('show');
+
+            // 3秒后隐藏
+            setTimeout(hideBoundaryMessage, 3000);
+        }
+
+        // 隐藏边界提示信息
+        function hideBoundaryMessage() {
+            boundaryMessageEl.classList.remove('show');
+        }
+
+        // 启动应用
+        init();
+    </script>
+</body>
 </html>
